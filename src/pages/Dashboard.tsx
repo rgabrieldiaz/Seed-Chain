@@ -5,7 +5,9 @@ import { SeedValidationCard } from '../components/ui/SeedValidationCard';
 import { Activity, Box, DollarSign } from 'lucide-react';
 
 export function Dashboard() {
-  const { usdcBalance, tokenizedLots, aiValidationStatus, setAiValidationStatus } = useContractStore();
+  const { usdcBalance, registeredLots, aiValidationStatus, setAiValidationStatus } = useContractStore();
+  const tokenizedLots = registeredLots.length;
+
 
   // Simulate AI scanning process
   useEffect(() => {
@@ -57,11 +59,50 @@ export function Dashboard() {
           </div>
         </GlassCard>
         
-        {/* Placeholder cards to fill grid */}
-         <GlassCard className="col-span-1 lg:col-span-2 border-white/5 min-h-[200px] flex items-center justify-center text-slate-500 text-sm">
-           [ Gráfico de rendimiento de semilla pendiente de integración ]
-         </GlassCard>
+        {/* Recent Activity / Lots List */}
+        <GlassCard className="col-span-1 lg:col-span-2 border-white/5 min-h-[300px]">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg text-white font-medium">Actividad Reciente de Lotes</h2>
+            <span className="text-xs text-bioLime cursor-pointer hover:underline">Ver todos</span>
+          </div>
+          <div className="space-y-4">
+            {registeredLots.length === 0 ? (
+              <div className="text-center py-10 text-slate-500 text-sm">No hay lotes registrados recientemente.</div>
+            ) : (
+              registeredLots.map((lot) => (
+                <div key={lot.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:border-bioLime/20 transition-all group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-bioLime/10 rounded-lg flex items-center justify-center text-bioLime">
+                      <Box className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white group-hover:text-bioLime transition-colors">{lot.name}</h4>
+                      <p className="text-xs text-slate-500">{lot.variety} • {lot.origin}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm border font-medium text-white">${lot.price.toLocaleString()} USDC</div>
+                    <div className={cn(
+                      "text-[10px] uppercase tracking-widest font-bold mt-1",
+                      lot.status === 'minted' ? "text-bioLime" : "text-amber-500"
+                    )}>
+                      {lot.status}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </GlassCard>
       </div>
     </div>
   );
 }
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+

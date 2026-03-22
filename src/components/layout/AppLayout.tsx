@@ -1,11 +1,25 @@
-
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { useContractStore } from '../../store/useContractStore';
+
 
 export function AppLayout() {
+  const checkConnectivity = useContractStore((state) => state.checkConnectivity);
+
+  useEffect(() => {
+    // Initial check
+    checkConnectivity();
+    
+    // Interval check every 10s
+    const interval = setInterval(checkConnectivity, 10000);
+    return () => clearInterval(interval);
+  }, [checkConnectivity]);
+
   return (
     <div className="flex h-screen bg-deepForest text-slate-100 overflow-hidden font-sans">
+
       <Sidebar />
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* Background ambient light */}
