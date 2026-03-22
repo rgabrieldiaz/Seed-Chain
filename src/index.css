@@ -1,6 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-deepForest: #062C1D;
+  --color-bioLime: #BEF264;
+  --animate-scan: scan 2s linear infinite;
+
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+}
 
 @layer components {
   /* Glassmorphism utility */

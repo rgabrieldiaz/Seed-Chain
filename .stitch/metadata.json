@@ -1,0 +1,13 @@
+{
+  "name": "projects/17275568985587145723",
+  "projectId": "17275568985587145723",
+  "title": "Seed-Chain Dashboard",
+  "screens": {
+    "dashboard": {
+      "id": "f0ed3796e1e54d5f8f8b19f18e3fd293",
+      "sourceScreen": "projects/17275568985587145723/screens/f0ed3796e1e54d5f8f8b19f18e3fd293",
+      "width": 2560,
+      "height": 2302
+    }
+  }
+}
