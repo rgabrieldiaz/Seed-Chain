@@ -10,9 +10,12 @@ interface Lot {
   origin: string;
   weight: number;
   price: number;
-  status: 'pending' | 'validated' | 'minted';
+  status: 'pending' | 'scanning' | 'validated' | 'minted';
+  txHash?: string;
+  certUrl?: string;
   timestamp: number;
 }
+
 
 interface ContractState {
   networks: Record<Network, ConnectionStatus>;
@@ -23,9 +26,11 @@ interface ContractState {
   
   setNetworkStatus: (network: Network, status: ConnectionStatus) => void;
   setAiValidationStatus: (status: 'idle' | 'scanning' | 'validated') => void;
-  addLot: (lot: Omit<Lot, 'id' | 'status' | 'timestamp'>) => void;
+  addLot: (lot: Omit<Lot, 'id' | 'status' | 'timestamp' | 'txHash' | 'certUrl'>) => void;
+  startValidation: (lotId: string) => void;
   checkConnectivity: () => Promise<void>;
 }
+
 
 
 export const useContractStore = create<ContractState>((set) => ({
@@ -70,11 +75,37 @@ export const useContractStore = create<ContractState>((set) => ({
       ]
     })),
 
+  startValidation: (lotId) => {
+    set({ aiValidationStatus: 'scanning' });
+    
+    // Update lot status
+    set((state) => ({
+      registeredLots: state.registeredLots.map(l => 
+        l.id === lotId ? { ...l, status: 'scanning' } : l
+      )
+    }));
+
+    // After 5 seconds, finalize
+    setTimeout(() => {
+      set({ aiValidationStatus: 'validated' });
+      set((state) => ({
+        registeredLots: state.registeredLots.map(l => 
+          l.id === lotId ? { 
+            ...l, 
+            status: 'minted',
+            txHash: `0x${Math.random().toString(16).substr(2, 40)}`,
+            certUrl: `https://genlayer.io/certs/${l.id}`
+          } : l
+        )
+      }));
+    }, 5000);
+  },
+
   checkConnectivity: async () => {
-    // Dynamic Avalanche Check (Simulated for Hackathon but checking window.ethereum)
+    // Dynamic Avalanche Check
     const hasEth = typeof window !== 'undefined' && !!(window as any).ethereum;
     
-    // GenLayer Mock Check (Pinging a dummy endpoint or simulating latency)
+    // GenLayer Mock Check
     const genLayerStatus: ConnectionStatus = Math.random() > 0.1 ? 'connected' : 'disconnected';
 
     set({
@@ -85,4 +116,5 @@ export const useContractStore = create<ContractState>((set) => ({
     });
   }
 }));
+
 

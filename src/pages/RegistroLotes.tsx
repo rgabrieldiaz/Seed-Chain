@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, LocationOn, ExpandMore, Info, CheckCircle, Wallet, Sprout, ShieldCheck } from '../components/ui/StitchIcons';
+
+
 import { useContractStore } from '../store/useContractStore';
 import { GlassCard } from '../components/ui/GlassCard';
 import { clsx, type ClassValue } from 'clsx';
@@ -15,9 +17,14 @@ function cn(...inputs: ClassValue[]) {
 export default function RegistroLotes() {
   const navigate = useNavigate();
   const addLot = useContractStore((state) => state.addLot);
+  const startValidation = useContractStore((state) => state.startValidation);
+
   
   const [step, setStep] = useState(1);
+  const [isMinting, setIsMinting] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const [formData, setFormData] = useState({
+
     name: '',
     variety: 'Soja Intacta 2 Xtend',
     origin: '',
@@ -35,16 +42,35 @@ export default function RegistroLotes() {
     if (step < 3) setStep(step + 1);
     else {
       // Finalize
+      setIsMinting(true);
+      
       addLot({
+
         name: formData.name || 'Nuevo Lote',
         variety: formData.variety,
         origin: formData.origin || 'Desconocido',
         weight: formData.weight,
         price: formData.price
       });
-      navigate('/');
+
+      // We need to know which ID was generated. Let's modify addLot or just use the ID we created.
+      // For simplicity in this mock, I'll pass the ID logic.
+      
+      // Wait a bit to simulate initial submission
+      setTimeout(() => {
+        const lastLot = useContractStore.getState().registeredLots[0];
+        startValidation(lastLot.id);
+        
+        // Finalize state after store's 5s
+        setTimeout(() => {
+          setIsMinting(false);
+          setShowToast(true);
+          setTimeout(() => navigate('/'), 3000);
+        }, 5500);
+      }, 1000);
     }
   };
+
 
   return (
     <div className="max-w-6xl mx-auto pb-20">
@@ -254,13 +280,40 @@ export default function RegistroLotes() {
               </button>
               <button 
                 onClick={handleNext}
-                className="bg-bioLime text-deepForest px-10 py-4 rounded-xl font-bold hover:shadow-[0_0_20px_rgba(190,242,100,0.4)] transition-all active:scale-95"
+                disabled={isMinting}
+                className={cn(
+                  "bg-bioLime text-deepForest px-10 py-4 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2",
+                  isMinting ? "opacity-50 cursor-not-allowed" : "hover:shadow-[0_0_20px_rgba(190,242,100,0.4)]"
+                )}
               >
-                {step === 3 ? 'Mint Seed Token' : 'Continuar Registro'}
+                {isMinting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-deepForest/30 border-t-deepForest animate-spin rounded-full" />
+                    <span>Validando IA...</span>
+                  </>
+                ) : (
+                  step === 3 ? 'Iniciar Validación de Lote' : 'Continuar Registro'
+                )}
               </button>
             </div>
           </GlassCard>
         </div>
+
+        {/* Success Toast */}
+        <AnimatePresence>
+          {showToast && (
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-bioLime text-deepForest px-6 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] flex items-center gap-3 font-bold"
+            >
+              <CheckCircle className="w-6 h-6" />
+              <span>RWA Minted en Avalanche Mainnet</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
 
         {/* Right: Preview Section */}
         <div className="col-span-12 lg:col-span-5">

@@ -40,7 +40,7 @@ export function Dashboard() {
           </div>
           <div className="text-sm text-slate-400 flex flex-col gap-1">
             <p>+2.4% vs mes anterior</p>
-            <p>Liquidez disponible en cruce de cadenas (Avalanche/Stellar)</p>
+            <p>Liquidez disponible en Avalanche Mainnet (RWA Settlements)</p>
           </div>
         </GlassCard>
 
